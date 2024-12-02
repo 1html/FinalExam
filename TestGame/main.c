@@ -6,6 +6,8 @@
 #define WIDTH 80
 #define HEIGHT 24
 
+float currentRotation = 0.0f;
+
 void Initialize(GameObject_Line* obj, int objNum)
 {
     //객체 초기화(관절 3개)
@@ -53,14 +55,21 @@ int Input()
         if (ch == 27) {  // ESC 키가 눌리면 게임 종료
             return 99;
         }
+        else if (ch == 'a') {
+
+        }
     }
 
     return 0;
 }
 
-void Update(GameObject_Line* obj, int objNum, int e)
-{
-
+void Update(GameObject_Line* obj, int objNum, int e) {
+    if (e == 1) { // 회전 이벤트
+        currentRotation -= 30.0f; // 30도 좌측 회전
+        if (currentRotation < 0.0f) {
+            currentRotation += 360.0f; // 각도를 0-360도 범위로 유지
+        }
+    }
 }
 
 void Render(GameObject_Line* obj, int objNum, char* Buf, int width, int height)
@@ -93,13 +102,24 @@ void Render(GameObject_Line* obj, int objNum, char* Buf, int width, int height)
     lineA = multiply_matrix_vector(world, lineA);  // 점과 회전 행렬 곱셈 (Matrix3x3 * Vector3)
     lineB = multiply_matrix_vector(world, lineB);  // 점과 회전 행렬 곱셈 (Matrix3x3 * Vector3)
 
-    Elf2DDrawLine((int)lineA.x, (int)lineA.y, (int)lineB.x, (int)lineB.y, Buf, width, height);
+    int x1 = width / 2;         // 꼭짓점 A (중앙 상단)
+    int y1 = 0;                 // 꼭짓점 A (중앙 상단)
+    int x2 = width / 4;         // 꼭짓점 B (왼쪽 하단)
+    int y2 = height - 1;        // 꼭짓점 B (왼쪽 하단)
+    int x3 = 3 * width / 4;     // 꼭짓점 C (오른쪽 하단)
+    int y3 = height - 1;        // 꼭짓점 C (오른쪽 하단)
+
+    // 삼각형 그리기
+    Elf2DDrawLine2(x1, y1, x2, y2, Buf, width, height); // AB
+    Elf2DDrawLine2(x1, y1, x3, y3, Buf, width, height); // AC
+    Elf2DDrawLine2(x2, y2, x3, y3, Buf, width, height); // BC
+    
 }
 
 
 // 게임 루프
 int main() {
-    int fps = 60;
+    int fps = 30;
     double frameTime = 1000.0 / fps;
 
     // 전역 변수로 스크린 버퍼 선언
@@ -108,6 +128,8 @@ int main() {
     int screenHeight = HEIGHT;
 
     GameObject_Line LineObj[3];
+
+    
 
     // 게임 초기화
     Initialize(LineObj, 3);

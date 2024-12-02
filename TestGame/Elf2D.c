@@ -80,13 +80,28 @@ void Elf2DDrawLine2(float x1, float y1, float x2, float y2, char* Buffer, int wi
     int sy = (y1 < y2) ? 1 : -1;
     float err = dx - dy;
 
+    // 상단 꼭짓점 정의
+    int topX = width / 2;  // 화면 중앙 기준
+    int topY = 0;          // 삼각형의 상단 y 좌표
+
     while (1) {
         int ix1 = (int)roundf(x1); // float 좌표를 정수로 변환 (라운드)
         int iy1 = (int)roundf(y1); // float 좌표를 정수로 변환 (라운드)
 
         if (ix1 >= 0 && ix1 < width && iy1 >= 0 && iy1 < height)
         {
-            Buffer[iy1 * (width + 1) + ix1] = '*';  // 화면에 점을 찍음
+            if (ix1 == topX && iy1 == topY) {
+                // 상단 꼭짓점에서 ++ 출력
+                Buffer[iy1 * (width + 1) + ix1] = '+';
+                if (ix1 + 1 < width) { // 오른쪽에 추가 '+' 출력
+                    Buffer[iy1 * (width + 1) + ix1 + 1] = '+';
+                }
+            }
+            else {
+                // 나머지는 @ 출력
+                Buffer[iy1 * (width + 1) + ix1] = '@';
+                Buffer[iy1 * (width + 1) + ix1 + 1] = '@';
+            }
         }
 
         if (fabs(x1 - x2) < 0.01 && fabs(y1 - y2) < 0.01) // 부동소수점 비교 (오차 범위)
@@ -105,6 +120,7 @@ void Elf2DDrawLine2(float x1, float y1, float x2, float y2, char* Buffer, int wi
         }
     }
 }
+
 
 
 
